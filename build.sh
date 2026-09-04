@@ -11,8 +11,12 @@ APP_BUNDLE="${BUILD_DIR}/${APP_NAME}.app"
 
 echo "==> swift build (${CONFIG})"
 if [[ "$CONFIG" == "release" ]]; then
-    swift build -c release
-    BIN_PATH=".build/release/${APP_NAME}"
+    swift build -c release --arch arm64 --arch x86_64
+    if [[ -f ".build/apple/Products/Release/${APP_NAME}" ]]; then
+        BIN_PATH=".build/apple/Products/Release/${APP_NAME}"
+    else
+        BIN_PATH=".build/release/${APP_NAME}"
+    fi
 else
     swift build
     BIN_PATH=".build/debug/${APP_NAME}"
