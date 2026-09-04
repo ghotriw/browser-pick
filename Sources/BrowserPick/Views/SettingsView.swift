@@ -24,7 +24,10 @@ struct SettingsView: View {
                     addBrowser()
                 } label: {
                     Image(systemName: "plus")
+                        .frame(width: 14, height: 16)
                 }
+                .help("Add browser…")
+
                 Button {
                     if let id = selection,
                        let b = store.browsers.first(where: { $0.id == id }) {
@@ -32,12 +35,37 @@ struct SettingsView: View {
                     }
                 } label: {
                     Image(systemName: "minus")
+                        .frame(width: 14, height: 16)
                 }
                 .disabled(selection == nil)
+                .help("Remove selected browser")
+
+                Button {
+                    if let id = selection {
+                        store.moveUp(id: id)
+                    }
+                } label: {
+                    Image(systemName: "chevron.up")
+                        .frame(width: 14, height: 16)
+                }
+                .disabled(selection == nil || store.browsers.first?.id == selection)
+                .help("Move up")
+
+                Button {
+                    if let id = selection {
+                        store.moveDown(id: id)
+                    }
+                } label: {
+                    Image(systemName: "chevron.down")
+                        .frame(width: 14, height: 16)
+                }
+                .disabled(selection == nil || store.browsers.last?.id == selection)
+                .help("Move down")
 
                 Button("Rediscover") {
                     store.rediscover()
                 }
+                .help("Scan for installed browsers")
 
                 Spacer()
             }
@@ -89,26 +117,68 @@ struct SettingsView: View {
     }
 
     private var browserList: some View {
-        Table(store.browsers, selection: $selection) {
-            TableColumn("") { browser in
-                Image(nsImage: browser.icon())
-                    .resizable()
-                    .frame(width: 20, height: 20)
-            }
-            .width(28)
+        List(selection: $selection) {
+            ForEach(Array(store.browsers.enumerated()), id: \.element.id) { index, browser in
+                HStack(spacing: 8) {
+                    Image(systemName: "line.3.horizontal")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.tertiary)
+                        .frame(width: 14)
 
-            TableColumn("") { browser in
-                TextField("", text: nameBinding(for: browser))
-                    .background(ToolTip("Double-click to rename.\nBundle ID: \(browser.bundleIdentifier)"))
-            }
+                    Text(index < 9 ? "\(index + 1)" : "•")
+                        .font(.system(size: 11, design: .monospaced))
+                        .foregroundStyle(.tertiary)
+                        .frame(width: 12)
 
-            TableColumn("Shortcut") { browser in
-                TextField("", text: shortcutBinding(for: browser))
-                    .frame(width: 60)
-                    .background(ToolTip("Single key. Pressing this letter in the chooser opens this browser. Leave blank to disable."))
+                    Image(nsImage: browser.icon())
+                        .resizable()
+                        .frame(width: 20, height: 20)
+
+                    TextField("", text: nameBinding(for: browser))
+                        .textFieldStyle(.plain)
+                        .background(ToolTip("Double-click to rename.\nBundle ID: \(browser.bundleIdentifier)"))
+
+                    Spacer()
+
+                    HStack(spacing: 4) {
+                        Text("Shortcut:")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        TextField("", text: shortcutBinding(for: browser))
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 32)
+                            .multilineTextAlignment(.center)
+                            .background(ToolTip("Single key. Pressing this letter in the chooser opens this browser. Leave blank to disable."))
+                    }
+                }
+                .padding(.vertical, 3)
+                .tag(browser.id)
+                .contentShape(Rectangle())
+                .draggable(browser.id) {
+                    HStack(spacing: 8) {
+                        Image(nsImage: browser.icon())
+                            .resizable()
+                            .frame(width: 18, height: 18)
+                        Text(browser.name)
+                            .font(.system(size: 13, weight: .medium))
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(.regularMaterial, in: .rect(cornerRadius: 6))
+                }
+                .dropDestination(for: String.self) { items, _ in
+                    guard let sourceId = items.first, sourceId != browser.id else { return false }
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        store.move(fromId: sourceId, toId: browser.id)
+                    }
+                    return true
+                }
             }
-            .width(80)
+            .onMove { indices, newOffset in
+                store.move(fromOffsets: indices, toOffset: newOffset)
+            }
         }
+        .listStyle(.inset(alternatesRowBackgrounds: true))
         .frame(minHeight: 240)
     }
 

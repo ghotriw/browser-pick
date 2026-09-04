@@ -44,6 +44,35 @@ final class BrowserStore {
         save()
     }
 
+    func move(fromOffsets source: IndexSet, toOffset destination: Int) {
+        browsers.move(fromOffsets: source, toOffset: destination)
+        save()
+    }
+
+    func move(fromId: String, toId: String) {
+        guard let sourceIndex = browsers.firstIndex(where: { $0.id == fromId }),
+              let targetIndex = browsers.firstIndex(where: { $0.id == toId }),
+              sourceIndex != targetIndex else { return }
+
+        let item = browsers.remove(at: sourceIndex)
+        let destinationIndex = browsers.firstIndex(where: { $0.id == toId })!
+        let insertIndex = sourceIndex < targetIndex ? destinationIndex + 1 : destinationIndex
+        browsers.insert(item, at: insertIndex)
+        save()
+    }
+
+    func moveUp(id: String) {
+        guard let index = browsers.firstIndex(where: { $0.id == id }), index > 0 else { return }
+        browsers.swapAt(index, index - 1)
+        save()
+    }
+
+    func moveDown(id: String) {
+        guard let index = browsers.firstIndex(where: { $0.id == id }), index < browsers.count - 1 else { return }
+        browsers.swapAt(index, index + 1)
+        save()
+    }
+
     func rediscover() {
         let discovered = Browser.discoverInstalled()
         let existingIDs = Set(browsers.map(\.bundleIdentifier))
