@@ -12,14 +12,24 @@ final class BrowserStore {
         }
     }
 
-    private let storageKey = "browsers"
-    private let chooserPositionKey = "chooserPosition"
-    private let defaults = UserDefaults.standard
+    private let storageKey: String
+    private let chooserPositionKey: String
+    private let defaults: UserDefaults
+    private let discovery: () -> [Browser]
 
-    init() {
+    init(
+        defaults: UserDefaults = .standard,
+        storageKey: String = "browsers",
+        chooserPositionKey: String = "chooserPosition",
+        discovery: @escaping () -> [Browser] = Browser.discoverInstalled
+    ) {
+        self.defaults = defaults
+        self.storageKey = storageKey
+        self.chooserPositionKey = chooserPositionKey
+        self.discovery = discovery
         load()
         if browsers.isEmpty {
-            browsers = Browser.discoverInstalled()
+            browsers = discovery()
             save()
         }
     }
@@ -80,7 +90,7 @@ final class BrowserStore {
     }
 
     func rediscover() {
-        let discovered = Browser.discoverInstalled()
+        let discovered = discovery()
         let existingIDs = Set(browsers.map(\.bundleIdentifier))
         for b in discovered where !existingIDs.contains(b.bundleIdentifier) {
             browsers.append(b)
@@ -95,6 +105,10 @@ final class BrowserStore {
     func browser(at index: Int) -> Browser? {
         guard browsers.indices.contains(index) else { return nil }
         return browsers[index]
+    }
+
+    func browser(bundleIdentifier: String) -> Browser? {
+        browsers.first { $0.bundleIdentifier == bundleIdentifier }
     }
 
     private func load() {

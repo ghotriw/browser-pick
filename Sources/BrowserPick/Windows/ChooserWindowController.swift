@@ -9,11 +9,12 @@ private final class ChooserPanel: NSPanel {
 
 final class ChooserWindowController: NSWindowController, NSWindowDelegate {
     private let store: BrowserStore
-    private let onPick: (Browser, URL) -> Void
-    private var currentURL: URL?
+    private let onPick: (Browser, WebURLRequest) -> Void
+    private var requests = FIFOQueue<WebURLRequest>()
     private var clickMonitor: Any?
+    private var lastPickTime: Date?
 
-    init(store: BrowserStore, onPick: @escaping (Browser, URL) -> Void) {
+    init(store: BrowserStore, onPick: @escaping (Browser, WebURLRequest) -> Void) {
         self.store = store
         self.onPick = onPick
 
@@ -38,16 +39,33 @@ final class ChooserWindowController: NSWindowController, NSWindowDelegate {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
 
-    func show(for url: URL) {
-        currentURL = url
+    func enqueue(_ request: WebURLRequest) {
+        let shouldPresent = requests.current == nil
+        requests.enqueue(request)
+        if shouldPresent {
+            showCurrent()
+        }
+    }
+
+    private func showCurrent() {
+        guard let request = requests.current else {
+            hide()
+            return
+        }
+
         let view = ChooserView(
             store: store,
-            url: url,
+            request: request,
             onPick: { [weak self] browser in
-                guard let url = self?.currentURL else { return }
-                self?.onPick(browser, url)
+                guard let self, let completedRequest = self.requests.completeCurrent() else { return }
+                self.lastPickTime = Date()
+                self.onPick(browser, completedRequest)
+                self.showCurrent()
             },
-            onCancel: { [weak self] in self?.hide() }
+            onCancel: { [weak self] in
+                self?.requests.cancelCurrent()
+                self?.showCurrent()
+            }
         )
         window?.contentViewController = NSHostingController(rootView: view)
 
@@ -107,7 +125,7 @@ final class ChooserWindowController: NSWindowController, NSWindowDelegate {
     func hide() {
         removeClickMonitor()
         window?.orderOut(nil)
-        currentURL = nil
+        requests = FIFOQueue<WebURLRequest>()
     }
 
     private func installClickMonitor() {
@@ -125,6 +143,14 @@ final class ChooserWindowController: NSWindowController, NSWindowDelegate {
     }
 
     func windowDidResignKey(_ notification: Notification) {
+        if Date().timeIntervalSince(lastPickTime ?? .distantPast) < 1.0 {
+            if requests.current != nil {
+                window?.makeKeyAndOrderFront(nil)
+                window?.orderFrontRegardless()
+                NSApp.activate(ignoringOtherApps: true)
+            }
+            return
+        }
         hide()
     }
 }

@@ -33,14 +33,16 @@ Sources/BrowserPick/
 ├── main.swift                              ~5 LOC entry point
 ├── AppDelegate.swift                       menubar + URL events
 ├── DefaultBrowserManager.swift             read/set system default http(s) handler
+├── FIFOQueue.swift                         generic request queue
 ├── LaunchAtLogin.swift                     SMAppService wrapper
 ├── Models/{Browser,BrowserStore,ChooserPosition}.swift
 ├── Views/{Settings,Chooser}View.swift
+├── WebURLRequest.swift                     URL validation & normalization
 └── Windows/{Settings,Chooser}WindowController.swift
+Tests/BrowserPickTests/SecurityTests.swift  unit tests (validation, queue, store)
 Resources/Info.plist
 build.sh                                    SPM build → .app assembly (universal in release)
 install.sh                                  build → copy to /Applications → launch
-release.sh                                  local bump → build → zip → GitHub Release + tap bump
 .github/workflows/build-and-release.yml      CI workflow: Universal build & GitHub Release on v* tag
 ```
 
@@ -80,7 +82,7 @@ release.sh                                  local bump → build → zip → Git
 ## Distribution
 
 - GitHub Releases for the zipped `.app`. Builds are automated via GitHub Actions (`.github/workflows/build-and-release.yml`) on tag push (`v*`), producing Universal `.app.zip` assets with SHA256 checksums.
-- `release.sh` is the local release helper: bumps `Info.plist` version, builds, zips, tags, pushes, creates GitHub Release, and rewrites the cask in the tap repo (`ghotriw/homebrew-tap`, at `~/dev/homebrew-tap`).
+- Homebrew distribution: users install via `brew install --cask ghotriw/tap/browserpick`. Automated in CI via `.github/workflows/build-and-release.yml` with `HOMEBREW_TAP_TOKEN`.
 - No notarization yet. Users can `xattr -dr com.apple.quarantine` if Gatekeeper complains.
 
 ## What NOT to add

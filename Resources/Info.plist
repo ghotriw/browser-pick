@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>BrowserPick</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.cvladan.BrowserPick</string>
+	<string>com.ghotriw.BrowserPick</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.0.8</string>
+	<string>0.0.9</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -33,7 +33,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>0.0.8</string>
+	<string>0.0.9</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>15.0</string>
 	<key>LSUIElement</key>

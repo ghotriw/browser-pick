@@ -51,3 +51,22 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+
+      - name: Update Homebrew Tap
+        if: startsWith(github.ref, 'refs/tags/v') && env.TAP_TOKEN != ''
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          SHA256="$(awk '{print $1}' .build/BrowserPick.zip.sha256)"
+          git clone "https://x-access-token:${TAP_TOKEN}@github.com/ghotriw/homebrew-tap.git" /tmp/tap
+          sed -i '' -E \
+            -e "s/^([[:space:]]*version )\"[^\"]*\"/\\1\"${VERSION}\"/" \
+            -e "s/^([[:space:]]*sha256 ).*/\\1\"${SHA256}\"/" \
+            /tmp/tap/Casks/browserpick.rb
+          cd /tmp/tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/browserpick.rb
+          git commit -m "browserpick ${VERSION}"
+          git push origin HEAD
