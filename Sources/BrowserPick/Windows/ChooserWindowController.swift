@@ -65,8 +65,9 @@ final class ChooserWindowController: NSWindowController, NSWindowDelegate {
             }
         }
 
-        NSApp.activate()
         window?.makeKeyAndOrderFront(nil)
+        window?.orderFrontRegardless()
+        NSApp.activate(ignoringOtherApps: true)
         installClickMonitor()
     }
 

@@ -71,7 +71,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if settingsWindowController == nil {
             settingsWindowController = SettingsWindowController(store: store)
         }
-        NSApp.activate()
         settingsWindowController?.showWindow(nil)
     }
 
@@ -109,8 +108,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         linkAttrs[.link] = URL(string: "https://\(urlString)")!
         credits.append(NSAttributedString(string: urlString, attributes: linkAttrs))
 
-        NSApp.activate()
-        let options: [NSApplication.AboutPanelOptionKey: Any] = [.credits: credits]
+        NSApp.activate(ignoringOtherApps: true)
+        let options: [NSApplication.AboutPanelOptionKey: Any] = [
+            .credits: credits,
+            .version: ""
+        ]
         NSApp.orderFrontStandardAboutPanel(options: options)
     }
 
