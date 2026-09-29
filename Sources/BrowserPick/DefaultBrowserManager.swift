@@ -19,17 +19,9 @@ enum DefaultBrowserManager {
 
     /// Asks macOS to set BrowserPick as the default for http/https.
     /// macOS will show its own confirmation dialog. We can't bypass that.
-    static func setAsDefault(completion: @escaping @Sendable @MainActor (Error?) -> Void) {
+    static func setAsDefault() async throws {
         let bundleURL = Bundle.main.bundleURL
-
-        NSWorkspace.shared.setDefaultApplication(at: bundleURL, toOpenURLsWithScheme: "http") { httpErr in
-            if let httpErr {
-                Task { @MainActor in completion(httpErr) }
-                return
-            }
-            NSWorkspace.shared.setDefaultApplication(at: bundleURL, toOpenURLsWithScheme: "https") { httpsErr in
-                Task { @MainActor in completion(httpsErr) }
-            }
-        }
+        try await NSWorkspace.shared.setDefaultApplication(at: bundleURL, toOpenURLsWithScheme: "http")
+        try await NSWorkspace.shared.setDefaultApplication(at: bundleURL, toOpenURLsWithScheme: "https")
     }
 }

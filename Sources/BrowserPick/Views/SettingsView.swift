@@ -108,8 +108,10 @@ struct SettingsView: View {
 
     private func setAsDefault() {
         defaultErrorMessage = nil
-        DefaultBrowserManager.setAsDefault { error in
-            if let error {
+        Task {
+            do {
+                try await DefaultBrowserManager.setAsDefault()
+            } catch {
                 defaultErrorMessage = "Failed: \(error.localizedDescription)"
             }
             isDefault = DefaultBrowserManager.isDefault
@@ -217,7 +219,7 @@ struct SettingsView: View {
               let bundleID = bundle.bundleIdentifier else { return }
 
         let name = FileManager.default
-            .displayName(atPath: url.path)
+            .displayName(atPath: url.path(percentEncoded: false))
             .replacingOccurrences(of: ".app", with: "")
 
         store.add(Browser(

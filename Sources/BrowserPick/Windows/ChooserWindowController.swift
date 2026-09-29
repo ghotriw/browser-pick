@@ -57,7 +57,7 @@ final class ChooserWindowController: NSWindowController {
             window.center()
         }
 
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate()
         window?.makeKeyAndOrderFront(nil)
     }
 

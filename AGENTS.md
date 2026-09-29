@@ -14,7 +14,7 @@ BrowserPick — macOS menubar app that registers as default `http(s)` handler an
 - Builds with only Command Line Tools, no full Xcode required
 - Trivial to build in CI
 
-To build and test: `./build.sh && open .build/BrowserPick.app`. The user's machine has Swift 6.3.1 via CLT; this is enough.
+To build and test: `./install.sh` (builds and installs to `/Applications`, required for Launch Services and Launch at Login testing). For quick compile check without install: `./build.sh`. The user's machine has Swift 6.3.1 via CLT; this is enough. Release builds produce Universal binaries (`arm64` + `x86_64`).
 
 ## Stack
 
@@ -38,7 +38,10 @@ Sources/BrowserPick/
 ├── Views/{Settings,Chooser}View.swift
 └── Windows/{Settings,Chooser}WindowController.swift
 Resources/Info.plist
-build.sh
+build.sh                                    SPM build → .app assembly (universal in release)
+install.sh                                  build → copy to /Applications → launch
+release.sh                                  local bump → build → zip → GitHub Release + tap bump
+.github/workflows/build-and-release.yml      CI workflow: Universal build & GitHub Release on v* tag
 ```
 
 `main.swift` sets `NSApplication.activationPolicy = .accessory` — this is what makes the app a menubar-only app (combined with `LSUIElement = true` in Info.plist).
@@ -76,9 +79,8 @@ build.sh
 
 ## Distribution
 
-- GitHub Releases for the zipped `.app`.
-- Homebrew cask lives in a separate tap repo: `cvladan/homebrew-tap`, at `Casks/browserpick.rb`. The cask is **not** in this repo.
-- `release.sh` automates the full release: bump `Info.plist` version, build, zip, tag, push, create GitHub Release, then rewrite + commit + push the cask in the tap repo. The tap is expected at `~/dev/homebrew-tap` (override with `TAP_DIR`). Read the script before changing release flow; the README "Cutting a release" section documents the user-facing contract.
+- GitHub Releases for the zipped `.app`. Builds are automated via GitHub Actions (`.github/workflows/build-and-release.yml`) on tag push (`v*`), producing Universal `.app.zip` assets with SHA256 checksums.
+- `release.sh` is the local release helper: bumps `Info.plist` version, builds, zips, tags, pushes, creates GitHub Release, and rewrites the cask in the tap repo (`ghotriw/homebrew-tap`, at `~/dev/homebrew-tap`).
 - No notarization yet. Users can `xattr -dr com.apple.quarantine` if Gatekeeper complains.
 
 ## What NOT to add

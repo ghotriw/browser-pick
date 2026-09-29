@@ -1,5 +1,8 @@
 import Foundation
+import os
 import ServiceManagement
+
+private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "BrowserPick", category: "LaunchAtLogin")
 
 enum LaunchAtLogin {
     static var isEnabled: Bool {
@@ -13,7 +16,7 @@ enum LaunchAtLogin {
                     try SMAppService.mainApp.unregister()
                 }
             } catch {
-                NSLog("BrowserPick: failed to toggle launch at login: \(error)")
+                logger.error("BrowserPick: failed to toggle launch at login: \(error.localizedDescription)")
             }
         }
     }

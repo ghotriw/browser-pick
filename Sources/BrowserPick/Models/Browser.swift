@@ -20,7 +20,7 @@ struct Browser: Identifiable, Codable, Hashable {
                   bundleID != ourBundleID else { return nil }
 
             let name = FileManager.default
-                .displayName(atPath: url.path)
+                .displayName(atPath: url.path(percentEncoded: false))
                 .replacingOccurrences(of: ".app", with: "")
 
             return Browser(
@@ -34,6 +34,6 @@ struct Browser: Identifiable, Codable, Hashable {
     }
 
     func icon() -> NSImage {
-        NSWorkspace.shared.icon(forFile: bundleURL.path)
+        NSWorkspace.shared.icon(forFile: bundleURL.path(percentEncoded: false))
     }
 }

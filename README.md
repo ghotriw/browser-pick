@@ -17,14 +17,15 @@ Minimum viable scope:
 - Chooser popup on every intercepted URL, keyboard-driven (number keys / arrows + return).
 - Settings window:
   - Manage browser list: add/remove any `.app` that can open URLs.
+  - Reorder browsers via drag-and-drop or move up/down controls (determines `1`–`9` quick-select shortcuts).
   - Per-browser custom name, icon, and keyboard shortcut.
   - Launch at Login toggle.
 
 ## Tech
 
-- **Build system:** Swift Package Manager + shell script that assembles a `.app` bundle. No Xcode required, just Command Line Tools.
+- **Build system:** Swift Package Manager + shell script that assembles a `.app` bundle. No Xcode required, just Command Line Tools. Release builds produce Universal binaries (`arm64` + `x86_64`).
 - **Min macOS:** 15 Sequoia.
-- **Distribution:** GitHub Releases + Homebrew tap at [cvladan/homebrew-tap](https://github.com/cvladan/homebrew-tap).
+- **Distribution:** GitHub Releases (CI/CD via GitHub Actions) + Homebrew tap at [ghotriw/homebrew-tap](https://github.com/ghotriw/homebrew-tap).
 
 ### Why these choices
 
@@ -77,18 +78,19 @@ Sources/BrowserPick/
     └── ChooserWindowController.swift       NSPanel floating chooser
 
 Resources/Info.plist                        URL types, LSUIElement
-build.sh                                    SPM build → .app assembly
+build.sh                                    SPM build → .app assembly (universal in release)
 install.sh                                  build → copy to /Applications → launch
-release.sh                                  build → zip → GitHub Release + tap bump
+release.sh                                  local bump → build → zip → GitHub Release + tap bump
+.github/workflows/build-and-release.yml      CI workflow: Universal build & GitHub Release on v* tag
 ```
 
 ## Install
 
 ```sh
-brew install --cask cvladan/tap/browserpick
+brew install --cask ghotriw/tap/browserpick
 ```
 
-Brew will auto-tap [cvladan/homebrew-tap](https://github.com/cvladan/homebrew-tap) on first install. To update later:
+Brew will auto-tap [ghotriw/homebrew-tap](https://github.com/ghotriw/homebrew-tap) on first install. To update later:
 
 ```sh
 brew update
@@ -122,8 +124,8 @@ If you didn't get the default-browser prompt automatically, set it manually in *
 
 No App Store, no notarization for now. Distribution has two pieces:
 
-- **Source + release script** live in this repo.
-- **Cask recipe** lives in a separate Homebrew tap repo: [cvladan/homebrew-tap](https://github.com/cvladan/homebrew-tap), at `Casks/browserpick.rb`.
+- **Source, CI & release script** live in this repo. Pushing a tag (`v*`) triggers GitHub Actions to build a Universal release and create a GitHub Release with `.app.zip` and checksums.
+- **Cask recipe** lives in a separate Homebrew tap repo: [ghotriw/homebrew-tap](https://github.com/ghotriw/homebrew-tap), at `Casks/browserpick.rb`.
 - **The `.app` bundle** is **not** committed anywhere. It's attached as a binary asset to a GitHub Release in this repo, and the cask points brew at that URL.
 
 The split is required because Homebrew taps must be in repos named `homebrew-*` and follow a specific layout. Keeping the recipe in its own repo also means `brew upgrade` works (you can't upgrade direct-URL cask installs).
@@ -140,7 +142,7 @@ gh auth login
 Clone the tap next to this repo so `release.sh` can write to it:
 
 ```sh
-git clone https://github.com/cvladan/homebrew-tap ~/dev/homebrew-tap
+git clone https://github.com/ghotriw/homebrew-tap ~/dev/homebrew-tap
 ```
 
 `release.sh` looks for the tap at `~/dev/homebrew-tap`. Override with `TAP_DIR=/path/to/homebrew-tap ./release.sh ...` if you cloned it elsewhere.
@@ -171,7 +173,7 @@ That script:
 8. Creates a GitHub Release `v0.0.2` here and uploads the zip as a release asset.
 9. Rewrites `Casks/browserpick.rb` in the tap repo with the new `version` and `sha256`, commits (`browserpick 0.0.2`), and pushes the tap's `main`.
 
-After it finishes, anyone in the world can `brew install --cask cvladan/tap/browserpick` (or `brew upgrade --cask browserpick`) and pick up the new build. Brew refreshes tap state with `brew update`, which usually runs implicitly.
+After it finishes, anyone in the world can `brew install --cask ghotriw/tap/browserpick` (or `brew upgrade --cask browserpick`) and pick up the new build. Brew refreshes tap state with `brew update`, which usually runs implicitly.
 
 ### If something goes wrong mid-release
 
