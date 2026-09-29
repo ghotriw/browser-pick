@@ -100,7 +100,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ]
 
         let credits = NSMutableAttributedString(
-            string: "Pick which browser opens a link.\n\nOriginal by Vladan Čolović\n",
+            string: "Pick which browser opens a link.\n\nFork by Andrii Honcharov\nOriginal by Vladan Čolović\n\n",
             attributes: baseAttrs
         )
 
