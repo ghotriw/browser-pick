@@ -21,7 +21,7 @@ Inspired by [Velja](https://sindresorhus.com/velja) and [Choosy](https://choosy.
   - Add or remove any browser/app capable of opening URLs.
   - Reorder browsers via drag-and-drop or up/down buttons (sets `1`–`9` order).
   - Chooser placement: under mouse cursor (default) or center of screen.
-  - Custom display names, icons, and shortcuts.
+  - Custom display names and keyboard shortcuts.
   - Launch at Login toggle.
 
 ---
@@ -64,16 +64,6 @@ cd browser-pick
 ```
 
 `./install.sh` builds the app, copies it to `/Applications`, and launches it.
-
----
-
-## FAQ
-
-<details>
-<summary><b>Why is "AutoFill (BrowserPick)" running in Activity Monitor?</b></summary>
-
-That is `com.apple.AutoFillPanel`, an official macOS system XPC service for password/credential autofill. macOS automatically attaches this helper to any application registered as an `http`/`https` handler. BrowserPick itself contains no web views, makes no network calls, and never interacts with autofill.
-</details>
 
 ---
 
