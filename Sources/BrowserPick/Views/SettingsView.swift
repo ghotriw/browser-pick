@@ -72,6 +72,19 @@ struct SettingsView: View {
 
             Divider()
 
+            HStack {
+                Text("Show chooser:")
+                Picker("", selection: $store.chooserPosition) {
+                    ForEach(ChooserPosition.allCases) { pos in
+                        Text(pos.title).tag(pos)
+                    }
+                }
+                .labelsHidden()
+                .frame(width: 180)
+
+                Spacer()
+            }
+
             Toggle("Launch at Login", isOn: $launchAtLogin)
                 .onChange(of: launchAtLogin) { _, newValue in
                     LaunchAtLogin.isEnabled = newValue

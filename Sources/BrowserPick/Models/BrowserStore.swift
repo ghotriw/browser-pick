@@ -6,8 +6,14 @@ import Observation
 @Observable
 final class BrowserStore {
     private(set) var browsers: [Browser] = []
+    var chooserPosition: ChooserPosition = .mouseCursor {
+        didSet {
+            defaults.set(chooserPosition.rawValue, forKey: chooserPositionKey)
+        }
+    }
 
     private let storageKey = "browsers"
+    private let chooserPositionKey = "chooserPosition"
     private let defaults = UserDefaults.standard
 
     init() {
@@ -92,6 +98,11 @@ final class BrowserStore {
     }
 
     private func load() {
+        if let raw = defaults.string(forKey: chooserPositionKey),
+           let pos = ChooserPosition(rawValue: raw) {
+            chooserPosition = pos
+        }
+
         guard let data = defaults.data(forKey: storageKey),
               let decoded = try? JSONDecoder().decode([Browser].self, from: data) else {
             return

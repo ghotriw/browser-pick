@@ -18,6 +18,7 @@ Minimum viable scope:
 - Settings window:
   - Manage browser list: add/remove any `.app` that can open URLs.
   - Reorder browsers via drag-and-drop or move up/down controls (determines `1`–`9` quick-select shortcuts).
+  - Chooser placement preference: under mouse cursor (default) or center of screen.
   - Per-browser custom name, icon, and keyboard shortcut.
   - Launch at Login toggle.
 

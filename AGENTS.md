@@ -34,7 +34,7 @@ Sources/BrowserPick/
 ├── AppDelegate.swift                       menubar + URL events
 ├── DefaultBrowserManager.swift             read/set system default http(s) handler
 ├── LaunchAtLogin.swift                     SMAppService wrapper
-├── Models/{Browser,BrowserStore}.swift
+├── Models/{Browser,BrowserStore,ChooserPosition}.swift
 ├── Views/{Settings,Chooser}View.swift
 └── Windows/{Settings,Chooser}WindowController.swift
 Resources/Info.plist
