@@ -82,7 +82,7 @@ install.sh                                  build → copy to /Applications → 
 ## Distribution
 
 - GitHub Releases for the zipped `.app`. Builds are automated via GitHub Actions (`.github/workflows/build-and-release.yml`) on tag push (`v*`), producing Universal `.app.zip` assets with SHA256 checksums.
-- Homebrew distribution: users install via `brew install --cask ghotriw/tap/browserpick`. Automated in CI via `.github/workflows/build-and-release.yml` with `HOMEBREW_TAP_TOKEN`.
+- Homebrew distribution: users install via `brew install --cask ghotriw/tap/browserpick`. The cask is bumped by `.github/workflows/bump-casks.yml` in `ghotriw/homebrew-tap` (hourly, from the latest GitHub release); no token needed here.
 - No notarization yet. Users can `xattr -dr com.apple.quarantine` if Gatekeeper complains.
 
 ## What NOT to add
